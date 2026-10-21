@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>یارییا مافیا - Offline Local Network</title>
+    <title>یارییا مافیا - Offline 17 Roles</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -30,7 +30,7 @@
         }
     </style>
 </head>
-<body onclick="startHorrorMusic()" class="min-h-screen flex flex-col justify-between bg-cover bg-center bg-no-repeat bg-fixed relative" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.88), rgba(11, 12, 16, 0.96)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80');">
+<body class="min-h-screen flex flex-col justify-between bg-cover bg-center bg-no-repeat bg-fixed relative" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.88), rgba(11, 12, 16, 0.96)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80');">
 
     <!-- Screen 0: Site Passcode Lock -->
     <div id="siteLockOverlay" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
@@ -39,13 +39,13 @@
                 <i class="fa-solid fa-wifi-slash"></i>
             </div>
             <div class="space-y-1">
-                <h2 class="text-xl font-black text-white">یارییا مافیا (بێ انترنێت)</h2>
-                <p class="text-xs text-gray-400">تکایە رقمێ سڕی بنڤێسە دا چوویا ناڤ یاریێ ببی:</p>
+                <h2 class="text-xl font-black text-white">یارییا مافیا (17 ڕۆل)</h2>
+                <p class="text-xs text-gray-400">تکایە رقمێ سڕی بنڤێسە (1234):</p>
             </div>
 
             <div class="space-y-3">
-                <input type="password" id="inputSitePasscode" placeholder="رقمێ سڕی بنڤێسە..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-500 text-center font-mono text-lg tracking-widest">
-                <div id="siteLockError" class="hidden text-xs text-red-400 font-bold">رقمێ سڕی شاشە! (رقمێ ڕاست: 1234)</div>
+                <input type="password" id="inputSitePasscode" placeholder="رقمێ سڕی..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-500 text-center font-mono text-lg tracking-widest">
+                <div id="siteLockError" class="hidden text-xs text-red-400 font-bold">رقمێ سڕی شاشە!</div>
             </div>
 
             <button onclick="unlockSite()" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95">
@@ -61,15 +61,9 @@
                 <i class="fa-solid fa-mask text-red-500 text-2xl animate-pulse"></i>
                 <h1 class="text-xl font-black text-white tracking-wide">یارییا <span class="text-red-500">مافیا</span></h1>
             </div>
-            
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] bg-green-950 border border-green-800 text-green-400 font-bold px-2 py-0.5 rounded-full">
-                    <i class="fa-solid fa-signal text-[9px]"></i> Local Hotspot
-                </span>
-                <button onclick="toggleMusic(event)" id="musicToggleBtn" class="px-2.5 py-1 bg-red-950/80 border border-red-600 text-red-300 rounded-full text-[10px] font-bold flex items-center gap-1 shadow">
-                    <i id="musicIcon" class="fa-solid fa-volume-high"></i> <span id="musicText">مۆزیک</span>
-                </button>
-            </div>
+            <span class="text-[10px] bg-green-950 border border-green-800 text-green-400 font-bold px-2.5 py-1 rounded-full">
+                <i class="fa-solid fa-signal"></i> 17 ڕۆل (بێ ئینتەرنێت)
+            </span>
         </div>
     </header>
 
@@ -80,14 +74,14 @@
         <section id="screenChooseRole" class="space-y-6 my-auto text-center py-4">
             <div class="space-y-2">
                 <h2 class="text-2xl font-black text-white">بەرهەڤیا یاریێ بکە</h2>
-                <p class="text-xs text-gray-400">تۆ ل ڤێ یاریێ سەرۆکی یان یاریزان؟</p>
+                <p class="text-xs text-gray-400">تۆ سەرۆکی یان یاریزان؟</p>
             </div>
 
             <div class="grid grid-cols-1 gap-4">
                 <button onclick="selectUserType('host')" class="p-5 bg-gradient-to-br from-red-950/80 to-gray-900 border-2 border-red-600/60 hover:border-red-500 rounded-2xl flex items-center justify-between shadow-xl transition-all transform active:scale-95">
                     <div class="text-right">
-                        <h3 class="font-bold text-lg text-white">دروستکرنا ژۆرێ (سەرۆکێ یاریێ)</h3>
-                        <p class="text-xs text-gray-400 mt-1">هۆتسبۆتێ کارا بکە و یاریێ دەستپێنە</p>
+                        <h3 class="font-bold text-lg text-white">دروستکرنا ژۆرێ (سەرۆک)</h3>
+                        <p class="text-xs text-gray-400 mt-1">هۆتسبۆتێ ڤەکە و ڕۆلان هەلبژێرە</p>
                     </div>
                     <i class="fa-solid fa-crown text-3xl text-yellow-500"></i>
                 </button>
@@ -95,7 +89,7 @@
                 <button onclick="selectUserType('player')" class="p-5 bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-2xl flex items-center justify-between shadow-xl transition-all transform active:scale-95">
                     <div class="text-right">
                         <h3 class="font-bold text-lg text-white">چوونا ژوورێ (یاریزان)</h3>
-                        <p class="text-xs text-gray-400 mt-1">پەیوەندیێ ب Hotspot ی بکە و بچە ناڤ ژۆرێ</p>
+                        <p class="text-xs text-gray-400 mt-1">ل سەر مۆبایلا خۆ بەشدار ببە</p>
                     </div>
                     <i class="fa-solid fa-mobile-screen-button text-3xl text-blue-400"></i>
                 </button>
@@ -115,18 +109,18 @@
 
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <label class="text-sm font-bold text-white">یاریزانێن بەشداری کری:</label>
+                        <label class="text-sm font-bold text-white">یاریزانێن داخل بووین:</label>
                         <span id="connectedPlayersCount" class="text-xs font-bold text-green-400">0 یاریزان</span>
                     </div>
 
                     <div id="connectedPlayersList" class="flex flex-wrap gap-2 p-3 bg-gray-950 rounded-xl min-h-[60px] items-center border border-gray-800">
-                        <span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان ل سەر تەلیفونێن وان...</span>
+                        <span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان...</span>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <label class="text-sm font-bold text-white">دیارکرنا ڕۆلان (17 ڕۆل):</label>
+                        <label class="text-sm font-bold text-white">دیارکرنا 17 ڕۆلان:</label>
                         <span id="roleCounterText" class="text-xs font-bold text-red-400">0 ڕۆل</span>
                     </div>
                     <div id="rolesSelectorList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
@@ -135,14 +129,14 @@
 
             <button onclick="startGameAndAssignRoles()" class="w-full py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-paper-plane"></i>
-                بەلاڤکرنا ڕۆلان ل سەر مۆبایلان و دەستپێکرن
+                ناردنا ڕۆلان بۆ مۆبایلا یاریزانا
             </button>
         </section>
 
         <!-- Screen 3: Player Join -->
         <section id="screenPlayerJoin" class="hidden space-y-5 my-auto py-4">
             <div class="bg-gray-900/90 border border-gray-800 p-6 rounded-2xl space-y-4 shadow-xl">
-                <h3 class="text-lg font-bold text-white text-center">چوونا ناڤ ژۆرێ (بێ انترنێت)</h3>
+                <h3 class="text-lg font-bold text-white text-center">چوونا ناڤ ژۆرێ</h3>
                 <div class="space-y-3">
                     <div>
                         <label class="text-xs text-gray-400 mb-1 block">ناڤێ تە:</label>
@@ -167,8 +161,8 @@
                 <div class="inline-block p-4 bg-blue-950/60 rounded-full border border-blue-800 animate-pulse text-blue-400 text-4xl">
                     <i class="fa-solid fa-wifi"></i>
                 </div>
-                <h3 class="text-xl font-bold text-white">تۆ ژۆرێ دە بەشداری!</h3>
-                <p class="text-xs text-gray-400 leading-relaxed">تەلیفونا خۆ بگرە، هەر دەمێ سەرۆکی ڕۆل بەلاڤ کرن، کارتێ تە ئێکسەر ل سەر تەلیفونا تە دیار دبیت.</p>
+                <h3 class="text-xl font-bold text-white">تۆ ژۆرێ دە ئۆنلاینی!</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">تەلیفونا خۆ بگرە، هەر دەمێ سەرۆکی ڕۆلان بنێرێت، کارتێ تە ل سەر مۆبایلا تە دیار دبیت.</p>
             </div>
         </section>
 
@@ -179,33 +173,29 @@
                 <p class="text-xs text-gray-400">دەستێ خۆ ل سەر کارتێ بگرە دا ڕۆلێ خۆ ببینی</p>
             </div>
 
-            <!-- Role Card -->
             <div class="perspective-1000 w-full max-w-xs mx-auto h-96 cursor-pointer" id="roleCardContainer" onmousedown="revealCard(true)" onmouseup="revealCard(false)" ontouchstart="revealCard(true)" ontouchend="revealCard(false)">
                 <div id="roleCard" class="relative w-full h-full duration-500 transform-style-3d shadow-2xl rounded-2xl border border-gray-800">
                     
-                    <!-- Card Front -->
-                    <div class="absolute inset-0 w-full h-full bg-cover bg-center rounded-2xl p-6 flex flex-col justify-between items-center backface-hidden border-2 border-red-600/80 shadow-red-900/50 shadow-2xl overflow-hidden" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.75), rgba(11, 12, 16, 0.95)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80');">
+                    <div class="absolute inset-0 w-full h-full bg-cover bg-center rounded-2xl p-6 flex flex-col justify-between items-center backface-hidden border-2 border-red-600/80 shadow-2xl overflow-hidden" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.75), rgba(11, 12, 16, 0.95)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80');">
                         <div class="text-red-500 text-3xl"><i class="fa-solid fa-eye-slash"></i></div>
                         <div class="space-y-3 text-center z-10">
                             <div class="w-20 h-20 mx-auto rounded-full bg-red-950/80 border-2 border-red-500/60 flex items-center justify-center shadow-lg">
                                 <i class="fa-solid fa-mask text-4xl text-red-500"></i>
                             </div>
                             <h4 class="text-xl font-black text-white tracking-wide">کارتێ نهێنی</h4>
-                            <p class="text-xs text-gray-300 bg-black/60 p-2 rounded-lg backdrop-blur">دەستێ خۆ بگرە ل سەر ب شێوەیەکێ نەهێنی</p>
+                            <p class="text-xs text-gray-300 bg-black/60 p-2 rounded-lg">دەستێ خۆ بگرە ل سەر ب شێوەیەکێ نەهێنی</p>
                         </div>
                         <div class="text-xs text-yellow-400 font-mono font-bold tracking-widest bg-black/80 px-3 py-1 rounded-full border border-yellow-500/30">
-                            کرم زاخوی - بێ انترنێت
+                            یارییا مافیا
                         </div>
                     </div>
 
-                    <!-- Card Back -->
                     <div class="absolute inset-0 w-full h-full bg-gray-900 rounded-2xl p-5 flex flex-col justify-between items-center backface-hidden rotate-y-180 border-2" id="roleCardBack">
                         <div class="w-full flex justify-between items-center text-xs text-gray-400 border-b border-gray-800 pb-2">
                             <span>ڕۆلێ تە</span>
                             <i class="fa-solid fa-lock text-red-500"></i>
                         </div>
 
-                        <!-- Image & Details -->
                         <div class="space-y-2 text-center my-auto w-full">
                             <img id="roleImage" class="w-24 h-24 mx-auto rounded-xl object-cover border border-gray-700 shadow-md" src="" alt="Role image">
                             <h3 id="roleTitle" class="text-xl font-black text-white"></h3>
@@ -253,16 +243,28 @@
         <p class="text-xs text-gray-400">دروستکەرێ یاریێ: <strong class="text-yellow-400 font-bold tracking-wide">کرم زاخوی</strong></p>
     </footer>
 
-    <!-- Offline Broadcast Channel Engine Script -->
     <script>
         const SITE_MASTER_PASSCODE = "1234";
 
+        // هەموو 17 ڕۆل ل ڤێرە تەواڤ بوون
         const AVAILABLE_ROLES = [
             { id: 'simple_mafia', name: 'مافیا یێ سادە', icon: 'fa-user-ninja', color: 'text-red-500', bg: 'border-red-600', img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایەکی سادەی. شەڤێ دگەل تیمێ بکوژە و ب ڕۆژێ خۆ وەکو هاوڵاتی نیشان بدە.' },
+            { id: 'trick_mafia', name: 'مافیایێ فێلباز', icon: 'fa-masks-theater', color: 'text-red-400', bg: 'border-red-500', img: 'https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایێ فێلبازی. دکاری کارێن نەدیار بکەی و سەرۆکێ یاریێ ب خاپووری دەرباز بکەی.' },
+            { id: 'king_killer', name: 'مافیایێ شاه کوژ', icon: 'fa-skull-crossbones', color: 'text-red-700', bg: 'border-red-900', img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایێ شاه کوژی. کوشتنا تە ب شەڤێ بهێزترە و نکارن ب ساناهی بپارێزن.' },
             { id: 'godfather', name: 'سەرۆکێ مافیا', icon: 'fa-user-tie', color: 'text-red-600', bg: 'border-red-700', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ سەرۆکێ مافیایی! پۆلیس ب شەڤێ نکارێت ڕاستیا تە ئاشکرا بکەت.' },
+            { id: 'mafia_doctor', name: 'نوژدارێ مافیا', icon: 'fa-user-doctor', color: 'text-rose-500', bg: 'border-rose-600', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80', desc: 'تۆ نوژدارێ مافیایی! دکاری شەڤێ کەسەکێ تیمەکا خۆ ڕزگار بکەی.' },
             { id: 'simple_citizen', name: 'هاولاتێ سادە', icon: 'fa-user', color: 'text-gray-300', bg: 'border-gray-500', img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیەکێ سادەی! ب دەنگدانێ ل ڕۆژێ مافیایان دەردێخی.' },
             { id: 'citizen_doctor', name: 'نوژدارێ هاوڵاتی', icon: 'fa-hospital', color: 'text-green-400', bg: 'border-green-600', img: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ دکتۆرێ هاوڵاتیانی! هەر شەڤ دکاری کەسەکێ ژ کوشتنێ ڕزگار بکەی.' },
-            { id: 'police', name: 'پولیس', icon: 'fa-user-shield', color: 'text-blue-400', bg: 'border-blue-600', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80', desc: 'تۆ پولیسی! دکاری لێکۆلینێ ل گومانباران بکەی.' }
+            { id: 'judge', name: 'دادوەر', icon: 'fa-gavel', color: 'text-amber-500', bg: 'border-amber-600', img: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80', desc: 'تۆ دادوەری! ل ڕۆژێ دکاری دەنگدانا سێدارەدانێ پوچەڵ بکەی.' },
+            { id: 'mayor', name: 'باژێرڤان', icon: 'fa-landmark', color: 'text-yellow-500', bg: 'border-yellow-600', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80', desc: 'تۆ باژێرڤانی! دەنگێ تە ل ڕۆژێ دوو دەنگ هەژمارتن.' },
+            { id: 'scout', name: 'کەشاف', icon: 'fa-binoculars', color: 'text-purple-400', bg: 'border-purple-600', img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80', desc: 'تۆ کەشافی! دکاری شەڤێ لڤینا یاریزانان سەربکەی و بزانی کی سەرەدانا کی دکەت.' },
+            { id: 'werewolf', name: 'گورکول', icon: 'fa-wolf-pack-battalion', color: 'text-orange-500', bg: 'border-orange-600', img: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=400&q=80', desc: 'تۆ گورکولی! کەسایەتیەکێ سەربەخۆیە، دکاری شەڤێ هێرشی کەسەکی بکەی.' },
+            { id: 'lock_citizen', name: 'هاولاتیێ قفل', icon: 'fa-lock', color: 'text-blue-300', bg: 'border-blue-500', img: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ قفلی! دکاری شەڤێ دەمێ کەسەکی قفل بکەی دا نەشێت کار بکەت.' },
+            { id: 'hero', name: 'مێرخاص', icon: 'fa-shield-heart', color: 'text-emerald-400', bg: 'border-emerald-600', img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مێرخاسی! هەکە مافیا بڤێت تە بکوژن، دکاری خۆ بپارێزی.' },
+            { id: 'bomb_citizen', name: 'هاولاتیێ بومبە', icon: 'fa-bomb', color: 'text-amber-600', bg: 'border-amber-700', img: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ بومبی! هەکە تە بکوژی، تۆ دگەل خۆ مافیایەکی ژی دکوژی!' },
+            { id: 'detective', name: 'ڤەکۆلەر', icon: 'fa-magnifying-glass', color: 'text-cyan-400', bg: 'border-cyan-600', img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ ڤەکۆلەری! شەڤێ پرسیارا ناسناما راستی يا کەسەکێ دکەی.' },
+            { id: 'police', name: 'پولیس', icon: 'fa-user-shield', color: 'text-blue-400', bg: 'border-blue-600', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80', desc: 'تۆ پولیسی! دکاری لێکۆلینێ ل گومانباران بکەی.' },
+            { id: 'silent_citizen', name: 'هاولاتیێ بێ دەنگ', icon: 'fa-comment-slash', color: 'text-gray-400', bg: 'border-gray-600', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ بێ دەنگی! نابیچێ ب ئاخڤین ل ڕۆژێ، تنێ مافی هەیە ب دەنگی بەشدار ببێت.' }
         ];
 
         let roomCode = "";
@@ -299,7 +301,7 @@
                 } else if (msg.type === 'ROLES_ASSIGNED') {
                     const myRoleId = msg.assigned[myPlayerName];
                     if (myRoleId) {
-                        const roleObj = AVAILABLE_ROLES.find(r => r.id === myRoleId) || AVAILABLE_ROLES[2];
+                        const roleObj = AVAILABLE_ROLES.find(r => r.id === myRoleId) || AVAILABLE_ROLES[5];
                         showPlayerCardScreen(myPlayerName, roleObj);
                     }
                 } else if (msg.type === 'NEW_GAME_STARTED') {
@@ -315,7 +317,6 @@
                 roomCode = Math.floor(1000 + Math.random() * 9000).toString();
                 document.getElementById('displayRoomCode').innerText = roomCode;
                 
-                // Generate QR Code for easy local scanning
                 document.getElementById('qrcode').innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), { text: roomCode, width: 64, height: 64 });
 
@@ -364,7 +365,7 @@
             document.getElementById('connectedPlayersCount').innerText = `${connectedPlayers.length} یاریزان`;
 
             if (connectedPlayers.length === 0) {
-                container.innerHTML = `<span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان ل سەر تەلیفونێن وان...</span>`;
+                container.innerHTML = `<span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان...</span>`;
             } else {
                 container.innerHTML = connectedPlayers.map((p, i) => `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 border border-gray-800 text-yellow-400 text-xs rounded-full font-bold">
