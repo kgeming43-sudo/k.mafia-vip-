@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ku" class="dark" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>یارییا مافیا - Mafia Master Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PubNub Online Realtime SDK -->
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.2.min.js"></script>
+
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #f1f5f9;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .pulse-red { animation: pulseRed 2s infinite; }
+        @keyframes pulseRed {
+            0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(220, 38, 38, 0.8); }
+        }
+    </style>
+</head>
+<body onclick="startHorrorMusic()" class="min-h-screen flex flex-col justify-between bg-cover bg-center bg-no-repeat bg-fixed relative" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.88), rgba(11, 12, 16, 0.96)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80');">
+
+    <!-- Screen 0: Site Passcode Lock (پاراستنا بەربەست ل سەر دەستپێکا ماڵپەڕی) -->
+    <div id="siteLockOverlay" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-sm w-full bg-gray-900 border-2 border-red-600/80 p-6 rounded-2xl text-center space-y-5 shadow-2xl pulse-red">
+            <div class="w-16 h-16 mx-auto rounded-full bg-red-950/80 border border-red-500 flex items-center justify-center text-red-500 text-3xl shadow-lg">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-xl font-black text-white">یارییا مافیا یا پاراستی یە</h2>
+                <p class="text-xs text-gray-400">تکایە رقمێ سڕی بنڤێسە دا لینک بۆ تە ڤەبیت:</p>
+            </div>
+
+            <div class="space-y-3">
+                <input type="password" id="inputSitePasscode" placeholder="رقمێ سڕی بنڤێسە..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-500 text-center font-mono text-lg tracking-widest">
+                <div id="siteLockError" class="hidden text-xs text-red-400 font-bold">رقمێ سڕی شاشە! دووبارە تاقیبکە.</div>
+            </div>
+
+            <button onclick="unlockSite()" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95">
+                چوونا ناڤ یاریێ
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="p-4 border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-mask text-red-500 text-2xl animate-pulse"></i>
+                <h1 class="text-xl font-black text-white tracking-wide">یارییا <span class="text-red-500">مافیا</span></h1>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div id="gamePhaseBadge" class="hidden px-3 py-1 rounded-full text-xs font-bold border transition-all"></div>
+                <button onclick="toggleMusic(event)" id="musicToggleBtn" class="px-2.5 py-1 bg-red-950/80 border border-red-600 text-red-300 rounded-full text-[10px] font-bold flex items-center gap-1 shadow">
+                    <i id="musicIcon" class="fa-solid fa-volume-high"></i> <span id="musicText">مۆزیکا ترسناک</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-center">
+
+        <!-- Screen 1: Role Choose -->
+        <section id="screenChooseRole" class="space-y-6 my-auto text-center py-4">
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black text-white">بەرهەڤیا یاریێ بکە</h2>
+                <p class="text-xs text-gray-400">تۆ ل ڤێ یاریێ سەرۆکی یان یاریزان؟</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="selectUserType('host')" class="p-5 bg-gradient-to-br from-red-950/80 to-gray-900 border-2 border-red-600/60 hover:border-red-500 rounded-2xl flex items-center justify-between shadow-xl transition-all transform active:scale-95">
+                    <div class="text-right">
+                        <h3 class="font-bold text-lg text-white">دروستکرنا ژۆرێ (سەرۆکێ یاریێ)</h3>
+                        <p class="text-xs text-gray-400 mt-1">کۆنتڕۆلا تەماما یاریێ ب دەستێ تە یە</p>
+                    </div>
+                    <i class="fa-solid fa-crown text-3xl text-yellow-500"></i>
+                </button>
+
+                <button onclick="selectUserType('player')" class="p-5 bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-2xl flex items-center justify-between shadow-xl transition-all transform active:scale-95">
+                    <div class="text-right">
+                        <h3 class="font-bold text-lg text-white">چوونا ژوورێ (یاریزان)</h3>
+                        <p class="text-xs text-gray-400 mt-1">ل سەر تەلیفونا خۆ دێ بەشدار ببی</p>
+                    </div>
+                    <i class="fa-solid fa-mobile-screen-button text-3xl text-blue-400"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Screen 2: Host Setup -->
+        <section id="screenHostSetup" class="hidden space-y-5 my-auto py-2">
+            <div class="bg-gray-900/90 border border-gray-800 p-4 rounded-2xl space-y-4 shadow-xl backdrop-blur">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                    <div>
+                        <span class="text-xs text-gray-400 block">کۆدا ژۆرا ئۆنلاین (Room PIN):</span>
+                        <span id="displayRoomCode" class="text-2xl font-mono font-black text-yellow-400 tracking-wider"></span>
+                    </div>
+                    <span class="text-[10px] text-green-400 bg-green-950 px-2.5 py-1 rounded-full border border-green-800 font-bold">
+                        <i class="fa-solid fa-shield"></i> پاراستی
+                    </span>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-bold text-white">یاریزانێن داخل بووین:</label>
+                        <span id="connectedPlayersCount" class="text-xs font-bold text-green-400">0 یاریزان</span>
+                    </div>
+
+                    <div id="connectedPlayersList" class="flex flex-wrap gap-2 p-3 bg-gray-950 rounded-xl min-h-[60px] items-center border border-gray-800">
+                        <span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان ل سەر تەلیفونێن وان...</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-bold text-white">دیارکرنا ڕۆلان (17 ڕۆل):</label>
+                        <span id="roleCounterText" class="text-xs font-bold text-red-400">0 ڕۆل</span>
+                    </div>
+                    <div id="rolesSelectorList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <button onclick="startGameAndAssignRoles()" class="w-full py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i>
+                ناردنا ڕۆلان بۆ یاریزانان و دەستپێکرن
+            </button>
+        </section>
+
+        <!-- Screen 3: Player Join -->
+        <section id="screenPlayerJoin" class="hidden space-y-5 my-auto py-4">
+            <div class="bg-gray-900/90 border border-gray-800 p-6 rounded-2xl space-y-4 shadow-xl">
+                <h3 class="text-lg font-bold text-white text-center">چوونا ژوورێ</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">ناڤێ تە:</label>
+                        <input type="text" id="inputPlayerName" placeholder="ناڤێ خۆ بنڤێسە..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-red-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">کۆدا ژۆرێ (PIN):</label>
+                        <input type="number" id="inputRoomCode" placeholder="کۆدا سەرۆکی بنڤێسە..." class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-red-500 text-sm font-mono tracking-widest text-center">
+                    </div>
+                </div>
+                <div id="joinErrorMsg" class="hidden text-xs text-red-400 text-center font-bold"></div>
+            </div>
+
+            <button onclick="joinRoomAsPlayer()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-95">
+                چوونا ناڤ ژۆرێ
+            </button>
+        </section>
+
+        <!-- Screen 4: Player Waiting -->
+        <section id="screenPlayerWaiting" class="hidden space-y-6 text-center my-auto py-8">
+            <div class="bg-gray-900/90 border border-gray-800 p-8 rounded-2xl space-y-4 shadow-xl">
+                <div class="inline-block p-4 bg-blue-950/60 rounded-full border border-blue-800 animate-pulse text-blue-400 text-4xl">
+                    <i class="fa-solid fa-wifi"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">تۆ ژۆرێ دە ئۆنلاینی!</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">تەلیفونا خۆ ل دەستێ خۆ بگرە، کاتێ سەرۆک ڕۆلان بنێرێت ئێکسەر کارت ل تەلیفونا تە دیار دبیت.</p>
+            </div>
+        </section>
+
+        <!-- Screen 5: Player Role Card & Actions -->
+        <section id="screenPlayerRole" class="hidden space-y-5 text-center my-auto py-2">
+            <div class="space-y-1">
+                <h3 id="playerRoleHeader" class="text-lg font-bold text-white"></h3>
+                <p class="text-xs text-gray-400">دەستێ خۆ ل سەر کارتێ بگرە دا ڕۆلێ خۆ ببینی</p>
+            </div>
+
+            <!-- Role Card -->
+            <div class="perspective-1000 w-full max-w-xs mx-auto h-96 cursor-pointer" id="roleCardContainer" onmousedown="revealCard(true)" onmouseup="revealCard(false)" ontouchstart="revealCard(true)" ontouchend="revealCard(false)">
+                <div id="roleCard" class="relative w-full h-full duration-500 transform-style-3d shadow-2xl rounded-2xl border border-gray-800">
+                    
+                    <!-- Card Front -->
+                    <div class="absolute inset-0 w-full h-full bg-cover bg-center rounded-2xl p-6 flex flex-col justify-between items-center backface-hidden border-2 border-red-600/80 shadow-red-900/50 shadow-2xl overflow-hidden" style="background-image: linear-gradient(to bottom, rgba(11, 12, 16, 0.75), rgba(11, 12, 16, 0.95)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80');">
+                        <div class="text-red-500 text-3xl"><i class="fa-solid fa-eye-slash"></i></div>
+                        <div class="space-y-3 text-center z-10">
+                            <div class="w-20 h-20 mx-auto rounded-full bg-red-950/80 border-2 border-red-500/60 flex items-center justify-center shadow-lg">
+                                <i class="fa-solid fa-mask text-4xl text-red-500"></i>
+                            </div>
+                            <h4 class="text-xl font-black text-white tracking-wide">کارتێ نهێنی</h4>
+                            <p class="text-xs text-gray-300 bg-black/60 p-2 rounded-lg backdrop-blur">دەستێ خۆ بگرە ل سەر ب شێوەیەکێ نەهێنی</p>
+                        </div>
+                        <div class="text-xs text-yellow-400 font-mono font-bold tracking-widest bg-black/80 px-3 py-1 rounded-full border border-yellow-500/30">
+                            یارییا مافیا
+                        </div>
+                    </div>
+
+                    <!-- Card Back -->
+                    <div class="absolute inset-0 w-full h-full bg-gray-900 rounded-2xl p-5 flex flex-col justify-between items-center backface-hidden rotate-y-180 border-2" id="roleCardBack">
+                        <div class="w-full flex justify-between items-center text-xs text-gray-400 border-b border-gray-800 pb-2">
+                            <span>ڕۆلێ تە</span>
+                            <i class="fa-solid fa-lock text-red-500"></i>
+                        </div>
+
+                        <!-- Image & Details -->
+                        <div class="space-y-2 text-center my-auto w-full">
+                            <img id="roleImage" class="w-24 h-24 mx-auto rounded-xl object-cover border border-gray-700 shadow-md" src="" alt="Role image">
+                            <h3 id="roleTitle" class="text-xl font-black text-white"></h3>
+                            <p id="roleDescription" class="text-[11px] text-gray-300 px-2 leading-relaxed bg-gray-950/80 p-2.5 rounded-lg border border-gray-800 max-h-24 overflow-y-auto"></p>
+                            
+                            <!-- Teammates Mafia Box -->
+                            <div id="mafiaTeammatesBox" class="hidden text-right bg-red-950/80 p-2.5 rounded-lg border border-red-800/80">
+                                <h5 class="text-[11px] font-bold text-red-300 flex items-center gap-1 mb-1">
+                                    <i class="fa-solid fa-user-ninja"></i> ئەندامێن دی یێن مافیا:
+                                </h5>
+                                <div id="mafiaTeammatesList" class="text-[11px] text-white flex flex-wrap gap-1 font-semibold"></div>
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] text-red-400 font-semibold bg-red-950/40 px-3 py-1 rounded-full border border-red-900">
+                            دەستێ خۆ بەردە دا ڕەش ببێت
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Player Voting Area -->
+            <div id="playerVoteBox" class="hidden bg-gray-900/90 border border-yellow-600/50 p-4 rounded-xl space-y-2 shadow-lg">
+                <h4 class="text-xs font-bold text-yellow-400 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-check-to-slot"></i> دەنگدانا ڕۆژێ: دەنگێ خۆ بدە کەسەکێ گومانبار
+                </h4>
+                <div id="voteButtonsList" class="grid grid-cols-2 gap-2"></div>
+            </div>
+        </section>
+
+        <!-- Screen 6: Master Dashboard -->
+        <section id="screenMasterDashboard" class="hidden space-y-4 my-auto py-2">
+            
+            <!-- Phase Control Bar -->
+            <div class="bg-gray-900 border border-gray-800 p-3 rounded-2xl flex justify-between items-center shadow-lg">
+                <span class="text-xs font-bold text-gray-300">گوهۆڕینا قۆناغا یاریێ:</span>
+                <div class="flex gap-2">
+                    <button onclick="changePhase('night')" class="px-3 py-1.5 bg-indigo-950 hover:bg-indigo-900 border border-indigo-700 text-indigo-300 text-xs font-bold rounded-lg flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-moon"></i> شەڤ
+                    </button>
+                    <button onclick="changePhase('day')" class="px-3 py-1.5 bg-amber-950 hover:bg-amber-900 border border-amber-700 text-amber-300 text-xs font-bold rounded-lg flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-sun"></i> ڕۆژ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Players Master List -->
+            <div class="bg-gray-900/90 border border-gray-800 p-4 rounded-2xl space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-yellow-500"></i> لیستا یاریزانان و ڕۆلێن وان
+                    </h2>
+                    <span id="masterStatusText" class="text-[10px] text-green-400 bg-green-950 px-2 py-0.5 rounded-full border border-green-800 font-bold">
+                        یاری یا ئۆنلاینە
+                    </span>
+                </div>
+
+                <div id="masterSummaryList" class="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Voting Live Details -->
+            <div class="bg-gray-900/90 border border-yellow-600/40 p-4 rounded-2xl space-y-2 shadow-xl">
+                <h3 class="text-xs font-bold text-yellow-400 flex items-center gap-1 border-b border-gray-800 pb-2">
+                    <i class="fa-solid fa-chart-simple"></i> چاڤدێریا دەنگدانا یاریزانا (کێ دەنگ دا کی):
+                </h3>
+                <div id="masterLiveVotesList" class="space-y-1.5 max-h-36 overflow-y-auto text-xs text-gray-300">
+                    <span class="text-gray-500 italic">هێشتا چ دەنگ نەهاتینە دان...</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="restartNewGameSameRoom()" class="flex-1 py-3 bg-red-950 hover:bg-red-900 text-red-200 font-bold rounded-xl border border-red-800 transition-all text-xs flex items-center justify-center gap-2 shadow">
+                    <i class="fa-solid fa-rotate-right"></i> یارییا نوو (ب هەمان کۆد)
+                </button>
+                <button onclick="window.location.reload()" class="py-3 px-4 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-bold rounded-xl border border-gray-800 transition-all text-xs flex items-center justify-center">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Screen 7: Player Eliminated -->
+        <section id="screenPlayerEliminated" class="hidden space-y-6 text-center my-auto py-8">
+            <div class="bg-red-950/40 border-2 border-red-600/80 p-8 rounded-2xl space-y-4 shadow-2xl pulse-red">
+                <div class="w-20 h-20 mx-auto rounded-full bg-red-900/80 border-2 border-red-500 flex items-center justify-center text-red-400 text-4xl shadow-lg">
+                    <i class="fa-solid fa-skull-crossbones"></i>
+                </div>
+                <h3 class="text-2xl font-black text-white">تۆ ژ یاریێ دەرکەفتی!</h3>
+                <p class="text-xs text-gray-300 leading-relaxed">
+                    تۆ هاتییە کوشتن یان ژ لایێ سەرۆکی ڤە هاتییە دەربێخستن.<br>تکایە بێ دەنگ بە و سەحکە یاریێ ب شێوەیەکێ بێ دەنگ.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-3 text-center border-t border-gray-800/80 bg-gray-900/80 backdrop-blur">
+        <p class="text-xs text-gray-400">دروستکەرێ یاریێ: <strong class="text-yellow-400 font-bold tracking-wide">کرم زاخوی</strong></p>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        const SITE_MASTER_PASSCODE = "1234";
+
+        const AVAILABLE_ROLES = [
+            { id: 'simple_mafia', isMafia: true, name: 'مافیا یێ سادە', icon: 'fa-user-ninja', color: 'text-red-500', bg: 'border-red-600', img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایەکی سادەی. شەڤێ دگەل تیمێ بکوژە و ب ڕۆژێ خۆ وەکو هاوڵاتی نیشان بدە.' },
+            { id: 'trick_mafia', isMafia: true, name: 'مافیایێ فێلباز', icon: 'fa-masks-theater', color: 'text-red-400', bg: 'border-red-500', img: 'https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایێ فێلبازی. دکاری کارێن نەدیار بکەی و سەرۆکێ یاریێ ب خاپووری دەرباز بکەی.' },
+            { id: 'king_killer', isMafia: true, name: 'مافیایێ شاه کوژ', icon: 'fa-skull-crossbones', color: 'text-red-700', bg: 'border-red-900', img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مافیایێ شاه کوژی. کوشتنا تە ب شەڤێ بهێزترە و نکارن ب ساناهی بپارێزن.' },
+            { id: 'godfather', isMafia: true, name: 'سەرۆکێ مافیا', icon: 'fa-user-tie', color: 'text-red-600', bg: 'border-red-700', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ سەرۆکێ مافیایی! پۆلیس ب شەڤێ نکارێت ڕاستیا تە ئاشکرا بکەت.' },
+            { id: 'mafia_doctor', isMafia: true, name: 'نوژدارێ مافیا', icon: 'fa-user-doctor', color: 'text-rose-500', bg: 'border-rose-600', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80', desc: 'تۆ نوژدارێ مافیایی! دکاری شەڤێ کەسەکێ تیمەکا خۆ ڕزگار بکەی.' },
+            { id: 'simple_citizen', isMafia: false, name: 'هاولاتێ سادە', icon: 'fa-user', color: 'text-gray-300', bg: 'border-gray-500', img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیەکێ سادەی! ب دەنگدانێ ل ڕۆژێ مافیایان دەردێخی.' },
+            { id: 'citizen_doctor', isMafia: false, name: 'نوژدارێ هاوڵاتی', icon: 'fa-hospital', color: 'text-green-400', bg: 'border-green-600', img: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ دکتۆرێ هاوڵاتیانی! هەر شەڤ دکاری کەسەکێ ژ کوشتنێ ڕزگار بکەی.' },
+            { id: 'judge', isMafia: false, name: 'دادوەر', icon: 'fa-gavel', color: 'text-amber-500', bg: 'border-amber-600', img: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80', desc: 'تۆ دادوەری! ل ڕۆژێ دکاری دەنگدانا سێدارەدانێ پوچەڵ بکەی.' },
+            { id: 'mayor', isMafia: false, name: 'باژێرڤان', icon: 'fa-landmark', color: 'text-yellow-500', bg: 'border-yellow-600', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80', desc: 'تۆ باژێرڤانی! دەنگێ تە ل ڕۆژێ دوو دەنگ هەژمارتن.' },
+            { id: 'scout', isMafia: false, name: 'کەشاف', icon: 'fa-binoculars', color: 'text-purple-400', bg: 'border-purple-600', img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80', desc: 'تۆ کەشافی! دکاری شەڤێ لڤینا یاریزانان سەربکەی و بزانی کی سەرەدانا کی دکەت.' },
+            { id: 'werewolf', isMafia: false, name: 'گورکول', icon: 'fa-wolf-pack-battalion', color: 'text-orange-500', bg: 'border-orange-600', img: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=400&q=80', desc: 'تۆ گورکولی! کەسایەتیەکێ سەربەخۆیە، دکاری شەڤێ هێرشی کەسەکی بکەی.' },
+            { id: 'lock_citizen', isMafia: false, name: 'هاولاتیێ قفل', icon: 'fa-lock', color: 'text-blue-300', bg: 'border-blue-500', img: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ قفلی! دکاری شەڤێ دەمێ کەسەکی قفل بکەی دا نەشێت کار بکەت.' },
+            { id: 'hero', isMafia: false, name: 'مێرخاص', icon: 'fa-shield-heart', color: 'text-emerald-400', bg: 'border-emerald-600', img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80', desc: 'تۆ مێرخاسی! هەکە مافیا بڤێت تە بکوژن، دکاری خۆ بپارێزی.' },
+            { id: 'bomb_citizen', isMafia: false, name: 'هاولاتیێ بومبە', icon: 'fa-bomb', color: 'text-amber-600', bg: 'border-amber-700', img: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ بومبی! هەکە تە بکوژی، تۆ دگەل خۆ مافیایەکی ژی دکوژی!' },
+            { id: 'detective', isMafia: false, name: 'ڤەکۆلەر', icon: 'fa-magnifying-glass', color: 'text-cyan-400', bg: 'border-cyan-600', img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=400&q=80', desc: 'تۆ ڤەکۆلەری! شەڤێ پرسیارا ناسناما راستی يا کەسەکێ دکەی.' },
+            { id: 'police', isMafia: false, name: 'پولیس', icon: 'fa-user-shield', color: 'text-blue-400', bg: 'border-blue-600', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80', desc: 'تۆ پولیسی! دکاری لێکۆلینێ ل گومانباران بکەی.' },
+            { id: 'silent_citizen', isMafia: false, name: 'هاولاتیێ بێ دەنگ', icon: 'fa-comment-slash', color: 'text-gray-400', bg: 'border-gray-600', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80', desc: 'تۆ هاولاتیێ بێ دەنگی! نابیچێ ب ئاخڤین ل ڕۆژێ، تنێ مافی هەیە ب دەنگی بەشدار ببێت.' }
+        ];
+
+        let roomCode = "";
+        let connectedPlayers = [];
+        let selectedRoleIds = ['simple_mafia', 'godfather', 'citizen_doctor', 'police', 'simple_citizen'];
+        let myPlayerName = "";
+        let pubnub = null;
+        let liveVotesRecords = [];
+
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let horrorInterval = null;
+
+        function unlockSite() {
+            const inputVal = document.getElementById('inputSitePasscode').value.trim();
+            const errDiv = document.getElementById('siteLockError');
+
+            if (inputVal === SITE_MASTER_PASSCODE) {
+                document.getElementById('siteLockOverlay').classList.add('hidden');
+                startHorrorMusic();
+            } else {
+                errDiv.classList.remove('hidden');
+            }
+        }
+
+        function startHorrorMusic() {
+            if (isMusicPlaying) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                isMusicPlaying = true;
+
+                document.getElementById('musicText').innerText = "مۆزیک: کارا";
+                document.getElementById('musicIcon').className = "fa-solid fa-volume-high text-red-500 animate-pulse";
+
+                const creepyNotes = [55.00, 65.41, 73.42, 49.00];
+                let noteIdx = 0;
+
+                horrorInterval = setInterval(() => {
+                    if (!isMusicPlaying || !audioCtx) return;
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(creepyNotes[noteIdx % creepyNotes.length], audioCtx.currentTime);
+                        noteIdx++;
+
+                        const filter = audioCtx.createBiquadFilter();
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(250, audioCtx.currentTime);
+
+                        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 1.5);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 4.0);
+
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 4.2);
+                    } catch(e) {}
+                }, 3500);
+            } catch(e) {}
+        }
+
+        function toggleMusic(e) {
+            if (e) e.stopPropagation();
+            if (isMusicPlaying) {
+                isMusicPlaying = false;
+                if (horrorInterval) { clearInterval(horrorInterval); horrorInterval = null; }
+                if (audioCtx) { audioCtx.close(); audioCtx = null; }
+                document.getElementById('musicText').innerText = "مۆزیک: کوژاندی";
+                document.getElementById('musicIcon').className = "fa-solid fa-volume-xmark text-gray-400";
+            } else {
+                startHorrorMusic();
+            }
+        }
+
+        function playGunshotSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const bufferSize = audioCtx.sampleRate * 0.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.4);
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+                noise.stop(audioCtx.currentTime + 0.4);
+            } catch (e) {}
+        }
+
+        function showScreen(screenId) {
+            ['screenChooseRole', 'screenHostSetup', 'screenPlayerJoin', 'screenPlayerWaiting', 'screenPlayerRole', 'screenMasterDashboard', 'screenPlayerEliminated'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function setupPubNub(channelCode) {
+            pubnub = new PubNub({
+                publishKey: 'pub-c-8ba61f88-d62f-48e0-a7d1-0f7236d39bf9',
+                subscribeKey: 'sub-c-5e6e8979-d5ef-4d04-897b-81d3bc01b44d',
+                userId: 'user_' + Math.floor(Math.random() * 10000)
+            });
+            pubnub.subscribe({ channels: ['mafia_room_' + channelCode] });
+        }
+
+        function selectUserType(type) {
+            startHorrorMusic();
+            if (type === 'host') {
+                roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('displayRoomCode').innerText = roomCode;
+                showScreen('screenHostSetup');
+                renderRolesSelector();
+
+                setupPubNub(roomCode);
+                pubnub.addListener({
+                    message: (event) => {
+                        const msg = event.message;
+                        if (msg.type === 'PLAYER_JOINED') {
+                            if (!connectedPlayers.some(p => p.name === msg.name)) {
+                                connectedPlayers.push({ name: msg.name, isAlive: true, votes: 0, hasViewed: false });
+                                updateHostPlayersList();
+                            }
+                        } else if (msg.type === 'ROLE_VIEWED') {
+                            const p = connectedPlayers.find(x => x.name === msg.name);
+                            if (p) {
+                                p.hasViewed = true;
+                                renderMasterSummary();
+                            }
+                        } else if (msg.type === 'VOTE_CAST') {
+                            const target = connectedPlayers.find(p => p.name === msg.target);
+                            if (target) {
+                                target.votes = (target.votes || 0) + 1;
+                                liveVotesRecords.push({ voter: msg.voter, target: msg.target });
+                                renderMasterSummary();
+                                renderMasterLiveVotes();
+                            }
+                        } else if (msg.type === 'NEW_GAME_STARTED') {
+                            if (myPlayerName) {
+                                showScreen('screenPlayerWaiting');
+                            }
+                        }
+                    }
+                });
+            } else {
+                showScreen('screenPlayerJoin');
+            }
+        }
+
+        function renderRolesSelector() {
+            const container = document.getElementById('rolesSelectorList');
+            container.innerHTML = '';
+            AVAILABLE_ROLES.forEach(role => {
+                const count = selectedRoleIds.filter(r => r === role.id).length;
+                const card = document.createElement('div');
+                card.className = `p-2 bg-gray-950 border ${count > 0 ? 'border-red-600 bg-red-950/20' : 'border-gray-800'} rounded-xl flex justify-between items-center`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid ${role.icon} ${role.color}"></i>
+                        <span class="font-semibold text-gray-200 text-xs">${role.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="adjustRoleCount('${role.id}', -1)" class="w-6 h-6 bg-gray-800 rounded flex items-center justify-center font-bold text-gray-300">-</button>
+                        <span class="w-5 text-center font-mono font-bold text-yellow-400 text-xs">${count}</span>
+                        <button onclick="adjustRoleCount('${role.id}', 1)" class="w-6 h-6 bg-gray-800 rounded flex items-center justify-center font-bold text-gray-300">+</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('roleCounterText').innerText = `${selectedRoleIds.length} ڕۆل`;
+        }
+
+        function adjustRoleCount(roleId, change) {
+            if (change === 1) selectedRoleIds.push(roleId);
+            else if (change === -1) {
+                const idx = selectedRoleIds.indexOf(roleId);
+                if (idx > -1) selectedRoleIds.splice(idx, 1);
+            }
+            renderRolesSelector();
+        }
+
+        function updateHostPlayersList() {
+            const container = document.getElementById('connectedPlayersList');
+            document.getElementById('connectedPlayersCount').innerText = `${connectedPlayers.length} یاریزان`;
+
+            if (connectedPlayers.length === 0) {
+                container.innerHTML = `<span class="text-xs text-gray-500">چاڤەڕێی چوونا ژوورێ یا یاریزانان ل سەر تەلیفونێن وان...</span>`;
+            } else {
+                container.innerHTML = connectedPlayers.map((p, i) => `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 border border-gray-800 text-yellow-400 text-xs rounded-full font-bold">
+                        <i class="fa-solid fa-user text-gray-400"></i>
+                        ${p.name}
+                        <i onclick="removePlayerByHost(${i})" class="fa-solid fa-xmark text-red-400 cursor-pointer hover:text-red-300 mr-1"></i>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function removePlayerByHost(idx) {
+            connectedPlayers.splice(idx, 1);
+            updateHostPlayersList();
+        }
+
+        function joinRoomAsPlayer() {
+            startHorrorMusic();
+            const nameInput = document.getElementById('inputPlayerName').value.trim();
+            const codeInput = document.getElementById('inputRoomCode').value.trim();
+            const errorMsg = document.getElementById('joinErrorMsg');
+
+            if (!nameInput || !codeInput) {
+                errorMsg.innerText = "تکایە ناڤ و کۆدا ژۆرێ بنڤێسە!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            myPlayerName = nameInput;
+            roomCode = codeInput;
+
+            setupPubNub(roomCode);
+            pubnub.addListener({
+                message: (event) => {
+                    const msg = event.message;
+                    if (msg.type === 'ROLES_ASSIGNED') {
+                        const myRoleId = msg.assigned[myPlayerName];
+                        if (myRoleId) {
+                            const roleObj = AVAILABLE_ROLES.find(r => r.id === myRoleId) || AVAILABLE_ROLES[5];
+                            showPlayerCardScreen(myPlayerName, roleObj, msg.allRolesObj);
+                        }
+                    } else if (msg.type === 'PLAYER_ELIMINATED_EVENT') {
+                        if (msg.targetPlayer === myPlayerName) {
+                            playGunshotSound();
+                            showScreen('screenPlayerEliminated');
+                        }
+                    } else if (msg.type === 'PHASE_CHANGED') {
+                        updatePlayerPhaseUI(msg.phase, msg.alivePlayers);
+                    } else if (msg.type === 'NEW_GAME_STARTED') {
+                        showScreen('screenPlayerWaiting');
+                    }
+                }
+            });
+
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { type: 'PLAYER_JOINED', name: nameInput }
+            });
+
+            errorMsg.classList.add('hidden');
+            showScreen('screenPlayerWaiting');
+        }
+
+        function startGameAndAssignRoles() {
+            if (connectedPlayers.length === 0) return;
+            if (selectedRoleIds.length < connectedPlayers.length) return;
+
+            liveVotesRecords = [];
+            connectedPlayers.forEach(p => {
+                p.votes = 0;
+                p.isAlive = true;
+                p.hasViewed = false;
+            });
+
+            let shuffledRoles = [...selectedRoleIds].sort(() => Math.random() - 0.5);
+            let assignedObj = {};
+            let mafiaTeamNames = [];
+
+            connectedPlayers.forEach((player, idx) => {
+                const roleId = shuffledRoles[idx];
+                const roleObj = AVAILABLE_ROLES.find(r => r.id === roleId);
+                player.role = roleObj;
+                assignedObj[player.name] = roleId;
+
+                if (roleObj && roleObj.isMafia) {
+                    mafiaTeamNames.push(player.name);
+                }
+            });
+
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { 
+                    type: 'ROLES_ASSIGNED', 
+                    assigned: assignedObj,
+                    allRolesObj: { mafiaMembers: mafiaTeamNames }
+                }
+            });
+
+            showMasterDashboard();
+        }
+
+        function showPlayerCardScreen(playerName, roleObj, extraData) {
+            showScreen('screenPlayerRole');
+            document.getElementById('playerRoleHeader').innerText = `سلاو ${playerName}`;
+            document.getElementById('roleImage').src = roleObj.img;
+            document.getElementById('roleTitle').innerText = roleObj.name;
+            document.getElementById('roleDescription').innerText = roleObj.desc;
+            document.getElementById('roleCardBack').className = `absolute inset-0 w-full h-full bg-gray-900 rounded-2xl p-5 flex flex-col justify-between items-center backface-hidden rotate-y-180 border-2 ${roleObj.bg}`;
+
+            const mafiaBox = document.getElementById('mafiaTeammatesBox');
+            const mafiaList = document.getElementById('mafiaTeammatesList');
+            if (roleObj.isMafia && extraData && extraData.mafiaMembers) {
+                const teammates = extraData.mafiaMembers.filter(n => n !== playerName);
+                if (teammates.length > 0) {
+                    mafiaList.innerText = teammates.join(', ');
+                } else {
+                    mafiaList.innerText = 'ب تنێ تۆی (چ ئەندامێن دی نینن)';
+                }
+                mafiaBox.classList.remove('hidden');
+            } else {
+                mafiaBox.classList.add('hidden');
+            }
+
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { type: 'ROLE_VIEWED', name: playerName }
+            });
+        }
+
+        function revealCard(isReveal) {
+            const card = document.getElementById('roleCard');
+            card.style.transform = isReveal ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        }
+
+        function showMasterDashboard() {
+            showScreen('screenMasterDashboard');
+            renderMasterSummary();
+            renderMasterLiveVotes();
+        }
+
+        function renderMasterSummary() {
+            const container = document.getElementById('masterSummaryList');
+            container.innerHTML = connectedPlayers.map((p, i) => `
+                <div class="flex items-center justify-between p-3 bg-gray-950 border ${p.isAlive ? 'border-gray-800' : 'border-red-900/50 opacity-60'} rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center">
+                            <i class="fa-solid ${p.role ? p.role.icon : 'fa-user'} ${p.role ? p.role.color : 'text-gray-400'} text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-xs flex items-center gap-1.5">
+                                ${p.name}
+                                ${p.hasViewed ? '<span class="text-[9px] bg-green-950 text-green-400 border border-green-800 px-2 py-0.5 rounded-full font-bold">ڕۆل دیت</span>' : '<span class="text-[9px] bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded-full font-bold">چاڤەڕێ</span>'}
+                            </h4>
+                            <span class="text-[10px] ${p.role ? p.role.color : 'text-gray-400'} block">
+                                ${p.role ? p.role.name : 'دیارنەکریا'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        ${p.votes > 0 ? `<span class="text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-800 px-2 py-0.5 rounded-full font-mono font-bold">${p.votes} دەنگ</span>` : ''}
+                        ${p.isAlive ? `
+                            <button onclick="eliminatePlayerByMaster(${i})" class="px-2.5 py-1 bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 text-[10px] font-bold rounded-lg transition-all">
+                                <i class="fa-solid fa-gun mr-0.5"></i> دەربێخە
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMasterLiveVotes() {
+            const container = document.getElementById('masterLiveVotesList');
+            if (liveVotesRecords.length === 0) {
+                container.innerHTML = `<span class="text-gray-500 italic">هێشتا چ دەنگ نەهاتینە دان...</span>`;
+                return;
+            }
+            container.innerHTML = liveVotesRecords.map(rec => `
+                <div class="flex items-center justify-between bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-800">
+                    <span class="font-bold text-yellow-400">${rec.voter}</span>
+                    <span class="text-gray-400 text-[10px]">دەنگ دا بۆ</span>
+                    <span class="font-bold text-red-400">${rec.target}</span>
+                </div>
+            `).join('');
+        }
+
+        function eliminatePlayerByMaster(idx) {
+            const player = connectedPlayers[idx];
+            if (!player || !player.isAlive) return;
+
+            player.isAlive = false;
+            renderMasterSummary();
+
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { 
+                    type: 'PLAYER_ELIMINATED_EVENT', 
+                    targetPlayer: player.name 
+                }
+            });
+        }
+
+        function changePhase(phase) {
+            const aliveList = connectedPlayers.filter(p => p.isAlive).map(p => p.name);
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { 
+                    type: 'PHASE_CHANGED', 
+                    phase: phase,
+                    alivePlayers: aliveList
+                }
+            });
+        }
+
+        function updatePlayerPhaseUI(phase, aliveList) {
+            const badge = document.getElementById('gamePhaseBadge');
+            const voteBox = document.getElementById('playerVoteBox');
+            badge.classList.remove('hidden');
+
+            if (phase === 'day') {
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold border bg-amber-950 text-amber-300 border-amber-700 flex items-center gap-1";
+                badge.innerHTML = `<i class="fa-solid fa-sun"></i> قۆناغا ڕۆژێ`;
+
+                if (voteBox && aliveList) {
+                    voteBox.classList.remove('hidden');
+                    const btnList = document.getElementById('voteButtonsList');
+                    btnList.innerHTML = aliveList.filter(n => n !== myPlayerName).map(name => `
+                        <button onclick="castVote('${name}')" class="p-2 bg-gray-950 hover:bg-yellow-950 border border-gray-800 hover:border-yellow-600 rounded-lg text-xs font-bold text-gray-200 transition-all">
+                            ${name}
+                        </button>
+                    `).join('');
+                }
+            } else {
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold border bg-indigo-950 text-indigo-300 border-indigo-700 flex items-center gap-1";
+                badge.innerHTML = `<i class="fa-solid fa-moon"></i> قۆناغا شەڤێ`;
+                if (voteBox) voteBox.classList.add('hidden');
+            }
+        }
+
+        function castVote(targetName) {
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { type: 'VOTE_CAST', voter: myPlayerName, target: targetName }
+            });
+            document.getElementById('playerVoteBox').classList.add('hidden');
+        }
+
+        function restartNewGameSameRoom() {
+            liveVotesRecords = [];
+            connectedPlayers.forEach(p => {
+                p.votes = 0;
+                p.isAlive = true;
+                p.hasViewed = false;
+                p.role = null;
+            });
+
+            pubnub.publish({
+                channel: 'mafia_room_' + roomCode,
+                message: { type: 'NEW_GAME_STARTED' }
+            });
+
+            showScreen('screenHostSetup');
+            renderRolesSelector();
+            updateHostPlayersList();
+        }
+    </script>
+</body>
+
+</html>
